@@ -43,5 +43,5 @@ In the path paste your directory path
 | x31             | t6       | Temporary / caller-saved       | Caller-saved                       |
 
 
-[(![Alt text describing the image](relative/path/to/image.png)](https://github.com/kathireesan/vsdRiscvSoc/blob/85cdec0f23d1ef64593bc234dbd67bbae1b74f97/Screenshot%20from%202025-06-08%2015-28-49.png)
+![image alt](https://github.com/kathireesan/vsdRiscvSoc/blob/85cdec0f23d1ef64593bc234dbd67bbae1b74f97/Screenshot%20from%202025-06-08%2015-28-49.png)
 
