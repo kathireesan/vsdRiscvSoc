@@ -43,4 +43,5 @@ In the path paste your directory path
 | x31             | t6       | Temporary / caller-saved       | Caller-saved                       |
 
 
-Screenshot from 2025-06-08 15-28-49.png
+![Alt text describing the image](![Alt text describing the image](relative/path/to/image.png)
+)
