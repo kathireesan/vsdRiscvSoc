@@ -43,5 +43,5 @@ In the path paste your directory path
 | x31             | t6       | Temporary / caller-saved       | Caller-saved                       |
 
 
-![Alt text describing the image](![Alt text describing the image](relative/path/to/image.png)
-)
+![Alt text](![Alt text describing the image](relative/path/to/image.png)
+
