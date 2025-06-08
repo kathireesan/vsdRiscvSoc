@@ -1,47 +1,233 @@
-# INSTALLATION OF RISC-V TOOLCHAIN
-## UNPACK OF TOOLCHAIN
-<pre> ```tar -xvzf riscv-toolchain-rv32imac-x86_64-ubuntu.tar.gz ``` </pre>
-this will extract the tar file
-## ADD TOOLCHAIN TO THE PATH
-<pre> ```export PATH=/opt/riscv/bin:$PATH``` </pre>
-<pre> ```source ~/.bashrc``` </pre>
-In the path paste your directory path 
+# Week 1: RISC-V Toolchain Setup and Experiments
 
-| Register Number | ABI Name | Role / Description               | Calling Convention Role                |
-|-----------------|----------|--------------------------------|---------------------------------------|
-| x0              | zero     | Hardwired zero (always 0)       | —                                     |
-| x1              | ra       | Return address                  | Callee saves return address           |
-| x2              | sp       | Stack pointer                  | Points to the current stack frame     |
-| x3              | gp       | Global pointer                 | Points to global data                  |
-| x4              | tp       | Thread pointer                 | Thread local storage pointer          |
-| x5              | t0       | Temporary / caller-saved       | Caller-saved temporary register       |
-| x6              | t1       | Temporary / caller-saved       | Caller-saved temporary register       |
-| x7              | t2       | Temporary / caller-saved       | Caller-saved temporary register       |
-| x8              | s0 / fp   | Saved register / frame pointer | Callee-saved, also frame pointer      |
-| x9              | s1       | Saved register                 | Callee-saved                         |
-| x10             | a0       | Function argument 0 / return value 0 | Used to pass argument 0, return val   |
-| x11             | a1       | Function argument 1 / return value 1 | Used to pass argument 1, return val   |
-| x12             | a2       | Function argument 2             | Arguments                            |
-| x13             | a3       | Function argument 3             | Arguments                            |
-| x14             | a4       | Function argument 4             | Arguments                            |
-| x15             | a5       | Function argument 5             | Arguments                            |
-| x16             | a6       | Function argument 6             | Arguments                            |
-| x17             | a7       | Function argument 7             | Arguments                            |
-| x18             | s2       | Saved register                 | Callee-saved                        |
-| x19             | s3       | Saved register                 | Callee-saved                        |
-| x20             | s4       | Saved register                 | Callee-saved                        |
-| x21             | s5       | Saved register                 | Callee-saved                        |
-| x22             | s6       | Saved register                 | Callee-saved                        |
-| x23             | s7       | Saved register                 | Callee-saved                        |
-| x24             | s8       | Saved register                 | Callee-saved                        |
-| x25             | s9       | Saved register                 | Callee-saved                        |
-| x26             | s10      | Saved register                 | Callee-saved                        |
-| x27             | s11      | Saved register                 | Callee-saved                        |
-| x28             | t3       | Temporary / caller-saved       | Caller-saved                       |
-| x29             | t4       | Temporary / caller-saved       | Caller-saved                       |
-| x30             | t5       | Temporary / caller-saved       | Caller-saved                       |
-| x31             | t6       | Temporary / caller-saved       | Caller-saved                       |
+## 1. Install & Sanity-Check the Toolchain
 
+**Question:**  
+I have downloaded `riscv-toolchain-rv32imac-x86_64-ubuntu.tar.gz`. How exactly do I unpack it, add it to PATH, and confirm the `gcc`, `objdump`, and `gdb` binaries work?
 
-![image alt](https://github.com/kathireesan/vsdRiscvSoc/blob/85cdec0f23d1ef64593bc234dbd67bbae1b74f97/Screenshot%20from%202025-06-08%2015-28-49.png)
+**Steps:**
+```bash
+tar -xzf riscv-toolchain-rv32imac-x86_64-ubuntu.tar.gz
+export PATH=$HOME/riscv/bin:$PATH
+```
 
+**Add to `~/.bashrc`:**
+```bash
+echo 'export PATH=$HOME/riscv/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**Verify installation:**
+```bash
+riscv32-unknown-elf-gcc --version
+riscv32-unknown-elf-objdump --version
+riscv32-unknown-elf-gdb --version
+```
+
+---
+
+## 2. Compile "Hello, RISC-V"
+
+**Minimal Hello World in C:**
+```c
+#include <stdio.h>
+int main() {
+    printf("Hello, RISC-V!\n");
+    return 0;
+}
+```
+
+**Compile:**
+```bash
+riscv32-unknown-elf-gcc -march=rv32imc -mabi=ilp32 -o hello.elf hello.c
+file hello.elf
+```
+
+---
+
+## 3. From C to Assembly
+
+**Generate `.s` file:**
+```bash
+riscv32-unknown-elf-gcc -S -O0 hello.c
+```
+
+**Assembly Explanation:**  
+Prologue and epilogue include stack manipulation like:
+```asm
+addi sp, sp, -16
+sw ra, 12(sp)
+```
+
+---
+
+## 4. Hex Dump & Disassembly
+
+```bash
+riscv32-unknown-elf-objdump -d hello.elf > hello.dump
+riscv32-unknown-elf-objcopy -O ihex hello.elf hello.hex
+```
+
+Discuss instruction format: address, opcode, mnemonic, operands.
+
+---
+
+## 5. ABI & Register Cheat-Sheet
+
+| Register | ABI Name | Role              |
+|----------|----------|-------------------|
+| x0       | zero     | Constant zero     |
+| x1       | ra       | Return address    |
+| x2       | sp       | Stack pointer     |
+| x3       | gp       | Global pointer    |
+| x4       | tp       | Thread pointer    |
+| x5-x7    | t0-t2    | Temporaries       |
+| x8       | s0/fp    | Saved register/frame pointer |
+| x9       | s1       | Saved register    |
+| x10-x17  | a0-a7    | Function arguments/return |
+| x18-x27  | s2-s11   | Saved registers   |
+| x28-x31  | t3-t6    | Temporaries       |
+
+---
+
+## 6. Stepping with GDB
+
+```bash
+riscv32-unknown-elf-gdb hello.elf
+(gdb) target sim
+(gdb) break main
+(gdb) run
+(gdb) info reg a0
+(gdb) disassemble
+```
+
+---
+
+## 7. Running Under an Emulator
+
+**Spike:**
+```bash
+spike --isa=rv32imc pk hello.elf
+```
+
+**QEMU:**
+```bash
+qemu-system-riscv32 -nographic -kernel hello.elf
+```
+
+---
+
+## 8. Exploring GCC Optimisation
+
+Compile with both flags:
+```bash
+riscv32-unknown-elf-gcc -S -O0 hello.c -o hello_O0.s
+riscv32-unknown-elf-gcc -S -O2 hello.c -o hello_O2.s
+```
+
+Compare for: dead-code elimination, register allocation, inlining.
+
+---
+
+## 9. Inline Assembly Basics
+
+```c
+static inline uint32_t rdcycle(void) {
+    uint32_t c;
+    asm volatile ("csrr %0, cycle" : "=r"(c));
+    return c;
+}
+```
+
+---
+
+## 10. Memory-Mapped I/O Demo
+
+```c
+volatile uint32_t *gpio = (uint32_t*)0x10012000;
+*gpio = 0x1;
+```
+
+---
+
+## 11. Linker Script 101
+
+```ld
+SECTIONS {
+    .text 0x00000000 : { *(.text*) }
+    .data 0x10000000 : { *(.data*) }
+}
+```
+
+---
+
+## 12. Start-up Code & crt0
+
+- Sets up `sp`, clears `.bss`, calls `main()`, then infinite loop.
+- Refer to newlib or platform startup files.
+
+---
+
+## 13. Interrupt Primer
+
+- Configure `mtimecmp`, enable `mie`, and `mstatus`.
+
+```c
+__attribute__((interrupt)) void timer_isr(void) {
+    // Timer interrupt handler
+}
+```
+
+---
+
+## 14. rv32imac vs rv32imc – What’s the “A”?
+
+- Adds: `lr.w`, `sc.w`, `amoadd.w`, etc.
+- Use case: atomic locks, OS-level primitives.
+
+---
+
+## 15. Atomic Test Program
+
+Use `lr/sc` to implement a mutex:
+```c
+while (1) {
+    if (__sync_lock_test_and_set(&lock, 1) == 0) break;
+}
+```
+
+---
+
+## 16. Using Newlib printf Without an OS
+
+```c
+int _write(int fd, char *buf, int len) {
+    volatile char *UART_TX = (char*)0x10000000;
+    for (int i = 0; i < len; i++) {
+        *UART_TX = buf[i];
+    }
+    return len;
+}
+```
+
+---
+
+## 17. Endianness & Struct Packing
+
+```c
+union {
+    uint32_t i;
+    uint8_t b[4];
+} u;
+u.i = 0x01020304;
+printf("%02x %02x %02x %02x\n", u.b[0], u.b[1], u.b[2], u.b[3]);
+```
+
+---
+
+## 📸 Screenshot
+
+> 🖼️ **Paste your screenshot here:**  
+> ![Screenshot](screenshot.png)
+
+---
