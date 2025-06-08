@@ -1,5 +1,3 @@
 # INSTALLATION OF RISC-V TOOLCHAIN
----
-***
-___
- UNPACKING
+## UNPACK OF TOOLCHAIN
+'''tar -xvzf riscv-toolchain-rv32imac-x86_64-ubuntu.tar.gz'''
