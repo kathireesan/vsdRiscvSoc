@@ -27,7 +27,7 @@ riscv32-unknown-elf-gdb --version
 ```
 
 **📸 Screenshot:**
-![image alt]
+![Alt Text]
 (https://github.com/kathireesan/vsdRiscvSoc/blob/4bf6ddd713943a2ab48ba684209195295fedab24/Images/Screenshot%20from%202025-06-08%2018-34-27.png)
 
 ---
