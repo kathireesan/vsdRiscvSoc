@@ -1,5 +1,7 @@
 # Week 1: RISC-V Toolchain Setup and Experiments
 
+---
+
 ## 1. Install & Sanity-Check the Toolchain
 
 **Question:**  
@@ -24,6 +26,9 @@ riscv32-unknown-elf-objdump --version
 riscv32-unknown-elf-gdb --version
 ```
 
+**📸 Screenshot:**
+![Step 1 Screenshot](images/step1.png)
+
 ---
 
 ## 2. Compile "Hello, RISC-V"
@@ -43,6 +48,9 @@ riscv32-unknown-elf-gcc -march=rv32imc -mabi=ilp32 -o hello.elf hello.c
 file hello.elf
 ```
 
+**📸 Screenshot:**
+![Step 2 Screenshot](images/step2.png)
+
 ---
 
 ## 3. From C to Assembly
@@ -52,12 +60,14 @@ file hello.elf
 riscv32-unknown-elf-gcc -S -O0 hello.c
 ```
 
-**Assembly Explanation:**  
-Prologue and epilogue include stack manipulation like:
+**Prologue example:**
 ```asm
 addi sp, sp, -16
 sw ra, 12(sp)
 ```
+
+**📸 Screenshot:**
+![Step 3 Screenshot](images/step3.png)
 
 ---
 
@@ -68,7 +78,8 @@ riscv32-unknown-elf-objdump -d hello.elf > hello.dump
 riscv32-unknown-elf-objcopy -O ihex hello.elf hello.hex
 ```
 
-Discuss instruction format: address, opcode, mnemonic, operands.
+**📸 Screenshot:**
+![Step 4 Screenshot](images/step4.png)
 
 ---
 
@@ -88,6 +99,9 @@ Discuss instruction format: address, opcode, mnemonic, operands.
 | x18-x27  | s2-s11   | Saved registers   |
 | x28-x31  | t3-t6    | Temporaries       |
 
+**📸 Screenshot:**
+![Step 5 Screenshot](images/step5.png)
+
 ---
 
 ## 6. Stepping with GDB
@@ -100,6 +114,9 @@ riscv32-unknown-elf-gdb hello.elf
 (gdb) info reg a0
 (gdb) disassemble
 ```
+
+**📸 Screenshot:**
+![Step 6 Screenshot](images/step6.png)
 
 ---
 
@@ -115,17 +132,20 @@ spike --isa=rv32imc pk hello.elf
 qemu-system-riscv32 -nographic -kernel hello.elf
 ```
 
+**📸 Screenshot:**
+![Step 7 Screenshot](images/step7.png)
+
 ---
 
 ## 8. Exploring GCC Optimisation
 
-Compile with both flags:
 ```bash
 riscv32-unknown-elf-gcc -S -O0 hello.c -o hello_O0.s
 riscv32-unknown-elf-gcc -S -O2 hello.c -o hello_O2.s
 ```
 
-Compare for: dead-code elimination, register allocation, inlining.
+**📸 Screenshot:**
+![Step 8 Screenshot](images/step8.png)
 
 ---
 
@@ -139,6 +159,9 @@ static inline uint32_t rdcycle(void) {
 }
 ```
 
+**📸 Screenshot:**
+![Step 9 Screenshot](images/step9.png)
+
 ---
 
 ## 10. Memory-Mapped I/O Demo
@@ -147,6 +170,9 @@ static inline uint32_t rdcycle(void) {
 volatile uint32_t *gpio = (uint32_t*)0x10012000;
 *gpio = 0x1;
 ```
+
+**📸 Screenshot:**
+![Step 10 Screenshot](images/step10.png)
 
 ---
 
@@ -159,18 +185,21 @@ SECTIONS {
 }
 ```
 
+**📸 Screenshot:**
+![Step 11 Screenshot](images/step11.png)
+
 ---
 
 ## 12. Start-up Code & crt0
 
-- Sets up `sp`, clears `.bss`, calls `main()`, then infinite loop.
-- Refer to newlib or platform startup files.
+Sets up stack pointer, clears `.bss`, calls `main()`, infinite loop. Use newlib or platform-specific start files.
+
+**📸 Screenshot:**
+![Step 12 Screenshot](images/step12.png)
 
 ---
 
 ## 13. Interrupt Primer
-
-- Configure `mtimecmp`, enable `mie`, and `mstatus`.
 
 ```c
 __attribute__((interrupt)) void timer_isr(void) {
@@ -178,23 +207,30 @@ __attribute__((interrupt)) void timer_isr(void) {
 }
 ```
 
+**📸 Screenshot:**
+![Step 13 Screenshot](images/step13.png)
+
 ---
 
 ## 14. rv32imac vs rv32imc – What’s the “A”?
 
-- Adds: `lr.w`, `sc.w`, `amoadd.w`, etc.
-- Use case: atomic locks, OS-level primitives.
+Adds atomic instructions: `lr.w`, `sc.w`, `amoadd.w`, etc. Useful for lock-free structures.
+
+**📸 Screenshot:**
+![Step 14 Screenshot](images/step14.png)
 
 ---
 
 ## 15. Atomic Test Program
 
-Use `lr/sc` to implement a mutex:
 ```c
 while (1) {
     if (__sync_lock_test_and_set(&lock, 1) == 0) break;
 }
 ```
+
+**📸 Screenshot:**
+![Step 15 Screenshot](images/step15.png)
 
 ---
 
@@ -210,6 +246,9 @@ int _write(int fd, char *buf, int len) {
 }
 ```
 
+**📸 Screenshot:**
+![Step 16 Screenshot](images/step16.png)
+
 ---
 
 ## 17. Endianness & Struct Packing
@@ -223,11 +262,7 @@ u.i = 0x01020304;
 printf("%02x %02x %02x %02x\n", u.b[0], u.b[1], u.b[2], u.b[3]);
 ```
 
----
-
-## 📸 Screenshot
-
-> 🖼️ **Paste your screenshot here:**  
-> ![Screenshot](screenshot.png)
+**📸 Screenshot:**
+![Step 17 Screenshot](images/step17.png)
 
 ---
